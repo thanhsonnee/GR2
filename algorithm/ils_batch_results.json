@@ -1,0 +1,354 @@
+[
+  {
+    "instance": "bar-n100-1",
+    "vehicles": 1,
+    "cost": 404,
+    "gap_vehicles": -83.33333333333334,
+    "gap_cost": -44.80874316939891,
+    "runtime": 28.737776041030884,
+    "best_vehicles": 6,
+    "best_cost": 732,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 1,
+        "cost": 431,
+        "time": 9.264353275299072
+      },
+      {
+        "iteration": 2,
+        "vehicles": 1,
+        "cost": 422,
+        "time": 13.922775506973267
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 405,
+        "time": 18.741450786590576
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 404,
+        "time": 23.453552722930908
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 404,
+        "time": 28.736782550811768
+      }
+    ],
+    "instance_file": "../instances/n100/n100/bar-n100-1.txt"
+  },
+  {
+    "instance": "bar-n100-2",
+    "vehicles": 1,
+    "cost": 344,
+    "gap_vehicles": -80.0,
+    "gap_cost": -37.90613718411552,
+    "runtime": 18.754462957382202,
+    "best_vehicles": 5,
+    "best_cost": 554,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 2,
+        "cost": 361,
+        "time": 6.310390472412109
+      },
+      {
+        "iteration": 2,
+        "vehicles": 1,
+        "cost": 347,
+        "time": 9.524590015411377
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 347,
+        "time": 12.648178815841675
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 344,
+        "time": 15.629179954528809
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 344,
+        "time": 18.753472328186035
+      }
+    ],
+    "instance_file": "../instances/n100/n100/bar-n100-2.txt"
+  },
+  {
+    "instance": "bar-n100-3",
+    "vehicles": 1,
+    "cost": 433,
+    "gap_vehicles": -83.33333333333334,
+    "gap_cost": -41.957104557640754,
+    "runtime": 35.96065926551819,
+    "best_vehicles": 6,
+    "best_cost": 746,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 1,
+        "cost": 435,
+        "time": 11.81904125213623
+      },
+      {
+        "iteration": 2,
+        "vehicles": 1,
+        "cost": 433,
+        "time": 18.04402208328247
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 433,
+        "time": 24.080726861953735
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 433,
+        "time": 29.97186040878296
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 433,
+        "time": 35.959656715393066
+      }
+    ],
+    "instance_file": "../instances/n100/n100/bar-n100-3.txt"
+  },
+  {
+    "instance": "bar-n100-4",
+    "vehicles": 1,
+    "cost": 415,
+    "gap_vehicles": -91.66666666666666,
+    "gap_cost": -63.91304347826087,
+    "runtime": 12.246387958526611,
+    "best_vehicles": 12,
+    "best_cost": 1150,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 1,
+        "cost": 419,
+        "time": 4.008089065551758
+      },
+      {
+        "iteration": 2,
+        "vehicles": 1,
+        "cost": 419,
+        "time": 6.008741140365601
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 415,
+        "time": 8.094589948654175
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 415,
+        "time": 10.10399317741394
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 415,
+        "time": 12.24538278579712
+      }
+    ],
+    "instance_file": "../instances/n100/n100/bar-n100-4.txt"
+  },
+  {
+    "instance": "bar-n100-5",
+    "vehicles": 1,
+    "cost": 420,
+    "gap_vehicles": -83.33333333333334,
+    "gap_cost": -49.88066825775656,
+    "runtime": 15.287776947021484,
+    "best_vehicles": 6,
+    "best_cost": 838,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 1,
+        "cost": 436,
+        "time": 4.969786167144775
+      },
+      {
+        "iteration": 2,
+        "vehicles": 1,
+        "cost": 436,
+        "time": 7.551583290100098
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 425,
+        "time": 10.21216630935669
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 420,
+        "time": 12.811835050582886
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 420,
+        "time": 15.286722660064697
+      }
+    ],
+    "instance_file": "../instances/n100/n100/bar-n100-5.txt"
+  },
+  {
+    "instance": "bar-n100-6",
+    "vehicles": 1,
+    "cost": 428,
+    "gap_vehicles": -66.66666666666666,
+    "gap_cost": -45.68527918781726,
+    "runtime": 46.784979820251465,
+    "best_vehicles": 3,
+    "best_cost": 788,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 1,
+        "cost": 449,
+        "time": 15.39535927772522
+      },
+      {
+        "iteration": 2,
+        "vehicles": 1,
+        "cost": 445,
+        "time": 23.194332599639893
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 440,
+        "time": 31.008569717407227
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 431,
+        "time": 39.079248905181885
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 428,
+        "time": 46.781917095184326
+      }
+    ],
+    "instance_file": "../instances/n100/n100/bar-n100-6.txt"
+  },
+  {
+    "instance": "ber-n100-1",
+    "vehicles": 1,
+    "cost": 667,
+    "gap_vehicles": -92.3076923076923,
+    "gap_cost": -64.02373247033441,
+    "runtime": 27.117157697677612,
+    "best_vehicles": 13,
+    "best_cost": 1854,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 1,
+        "cost": 667,
+        "time": 8.69479751586914
+      },
+      {
+        "iteration": 2,
+        "vehicles": 1,
+        "cost": 667,
+        "time": 13.108500719070435
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 667,
+        "time": 17.559983491897583
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 667,
+        "time": 22.341457843780518
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 667,
+        "time": 27.11619806289673
+      }
+    ],
+    "instance_file": "../instances/n100/n100/ber-n100-1.txt"
+  },
+  {
+    "instance": "ber-n100-2",
+    "vehicles": 1,
+    "cost": 603,
+    "gap_vehicles": -83.33333333333334,
+    "gap_cost": -59.366576819407015,
+    "runtime": 64.14565801620483,
+    "best_vehicles": 6,
+    "best_cost": 1484,
+    "iterations": 5,
+    "history": [
+      {
+        "iteration": 1,
+        "vehicles": 3,
+        "cost": 609,
+        "time": 17.996739387512207
+      },
+      {
+        "iteration": 2,
+        "vehicles": 2,
+        "cost": 615,
+        "time": 29.934205770492554
+      },
+      {
+        "iteration": 3,
+        "vehicles": 1,
+        "cost": 620,
+        "time": 39.01718044281006
+      },
+      {
+        "iteration": 4,
+        "vehicles": 1,
+        "cost": 607,
+        "time": 48.03061819076538
+      },
+      {
+        "iteration": 5,
+        "vehicles": 1,
+        "cost": 603,
+        "time": 64.14461207389832
+      }
+    ],
+    "instance_file": "../instances/n100/n100/ber-n100-2.txt"
+  }
+]

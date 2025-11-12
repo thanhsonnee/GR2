@@ -1,0 +1,10 @@
+Instance name:	bar-n100-1
+Authors:		Large Neighborhood Search
+Date:			24-Oct-25
+Reference:		PDPTW Solver
+Solution
+Route 1 : 7 30 13 80 5 63 57 29 8 79 28 58 35 78 48 85 43 12 93 42 62 98 41 92 38 17 88 91 10 67 46 2 96 21 60 71 27 55 50 37 100 6 87 77 56 32 9 82 23 1 73 59 36 52 86 51
+Route 2 : 34 20 39 70 84 33 26 83 89 44 49 94 15 31 65 99 14 81 76 24 64 74
+Route 3 : 47 97
+Route 4 : 3 40 22 90 4 11 54 72 53 18 61 25 68 75
+Route 5 : 45 19 95 16 69 66

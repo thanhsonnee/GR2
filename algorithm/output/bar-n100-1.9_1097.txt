@@ -1,0 +1,14 @@
+Instance name:	bar-n100-1
+Authors:		Nearest Neighbor
+Date:			23-Oct-25
+Reference:		PDPTW Solver
+Solution
+Route 1 : 1 51 12 62 8 58 18 68
+Route 2 : 14 64 49 99 29 79 11 61 25 75 36 86 6 56 48 98
+Route 3 : 31 81 10 60 21 71 26 76 30 80 7 57 16 66 50 100 28 78 38 88
+Route 4 : 15 65 43 93 9 59 34 84 24 74 45 95 46 96
+Route 5 : 44 94 17 67 20 70 27 77 37 87 23 73 4 54
+Route 6 : 33 83 40 90 32 82 19 69 3 53
+Route 7 : 13 63 35 85 47 97 39 89 22 72
+Route 8 : 2 52 42 92 41 91
+Route 9 : 5 55

@@ -1,0 +1,134 @@
+{
+  "test_set": 2,
+  "algorithms": {
+    "Greedy": {
+      "algorithm": "Greedy",
+      "total_instances": 2,
+      "solved_instances": 2,
+      "total_time": 38.83894443511963,
+      "instances": {
+        "bar-n100-1": {
+          "cost": 1124,
+          "vehicles": 5,
+          "runtime": 7.075026273727417,
+          "benchmark_cost": 732,
+          "benchmark_vehicles": 6,
+          "cost_gap_percent": 53.551912568306015,
+          "vehicle_gap": -1,
+          "timeout": false,
+          "valid": false
+        },
+        "nyc-n100-1": {
+          "cost": 789,
+          "vehicles": 2,
+          "runtime": 31.763918161392212,
+          "benchmark_cost": 634,
+          "benchmark_vehicles": 6,
+          "cost_gap_percent": 24.44794952681388,
+          "vehicle_gap": -4,
+          "timeout": false,
+          "valid": false
+        }
+      }
+    },
+    "NearestNeighbor": {
+      "algorithm": "NearestNeighbor",
+      "total_instances": 2,
+      "solved_instances": 2,
+      "total_time": 0.0010595321655273438,
+      "instances": {
+        "bar-n100-1": {
+          "cost": 1097,
+          "vehicles": 9,
+          "runtime": 0.0010595321655273438,
+          "benchmark_cost": 732,
+          "benchmark_vehicles": 6,
+          "cost_gap_percent": 49.86338797814208,
+          "vehicle_gap": 3,
+          "timeout": false,
+          "valid": false
+        },
+        "nyc-n100-1": {
+          "cost": 998,
+          "vehicles": 18,
+          "runtime": 0.0,
+          "benchmark_cost": 634,
+          "benchmark_vehicles": 6,
+          "cost_gap_percent": 57.413249211356465,
+          "vehicle_gap": 12,
+          "timeout": false,
+          "valid": true
+        }
+      },
+      "avg_cost_gap": 57.413249211356465,
+      "avg_vehicle_gap": 12.0,
+      "avg_runtime": 0.0
+    },
+    "SimulatedAnnealing": {
+      "algorithm": "SimulatedAnnealing",
+      "total_instances": 2,
+      "solved_instances": 0,
+      "total_time": 0.0,
+      "instances": {
+        "bar-n100-1": {
+          "error": "name 'pickup_idx' is not defined",
+          "solved": false
+        },
+        "nyc-n100-1": {
+          "error": "name 'pickup_idx' is not defined",
+          "solved": false
+        }
+      }
+    },
+    "TabuSearch": {
+      "algorithm": "TabuSearch",
+      "total_instances": 2,
+      "solved_instances": 0,
+      "total_time": 0.0,
+      "instances": {
+        "bar-n100-1": {
+          "error": "name 'pickup_idx' is not defined",
+          "solved": false
+        },
+        "nyc-n100-1": {
+          "error": "name 'pickup_idx' is not defined",
+          "solved": false
+        }
+      }
+    }
+  },
+  "summary": {
+    "Greedy": {
+      "solved_instances": 2,
+      "solve_rate": 1.0,
+      "total_runtime": 38.83894443511963,
+      "avg_cost_gap": null,
+      "avg_vehicle_gap": null,
+      "avg_runtime": null
+    },
+    "NearestNeighbor": {
+      "solved_instances": 2,
+      "solve_rate": 1.0,
+      "total_runtime": 0.0010595321655273438,
+      "avg_cost_gap": 57.413249211356465,
+      "avg_vehicle_gap": 12.0,
+      "avg_runtime": 0.0
+    },
+    "SimulatedAnnealing": {
+      "solved_instances": 0,
+      "solve_rate": 0.0,
+      "total_runtime": 0.0,
+      "avg_cost_gap": null,
+      "avg_vehicle_gap": null,
+      "avg_runtime": null
+    },
+    "TabuSearch": {
+      "solved_instances": 0,
+      "solve_rate": 0.0,
+      "total_runtime": 0.0,
+      "avg_cost_gap": null,
+      "avg_vehicle_gap": null,
+      "avg_runtime": null
+    }
+  }
+}
