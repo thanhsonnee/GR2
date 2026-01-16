@@ -63,6 +63,9 @@ Chạy kiểm thử trên toàn bộ 56 instances của bộ Li & Lim (chỉ ch�
 python test_li_lim.py
 ```
 
+### Kịch bản 4: Phase 1 Test (Kiểm thử tối ưu hóa Phase 1)
+Chạy thử nghiệm trên instance lc101 với các cải tiến mới nhất (Lexicographic ordering, Route Elimination, Worst Removal, Variable Regret-k).
+
 ### Script kiểm tra tính hợp lệ (Validation)
 Để chứng minh kết quả tạo ra luôn tuân thủ mọi ràng buộc:
 ```bash
