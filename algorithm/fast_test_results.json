@@ -1,0 +1,118 @@
+{
+  "benchmark": "Li & Lim PDPTW - Fast Test",
+  "instances": 10,
+  "time_limit": 20,
+  "total_time": 619.9615962505341,
+  "results": [
+    {
+      "instance": "lc101",
+      "feasible": true,
+      "vehicles": 21,
+      "cost": 2262,
+      "runtime": 32.99900484085083,
+      "bks_vehicles": 10,
+      "bks_cost": 828.94,
+      "gap_vehicles": 110.00000000000001,
+      "gap_cost": 172.8786160638888
+    },
+    {
+      "instance": "lc104",
+      "feasible": true,
+      "vehicles": 14,
+      "cost": 1410,
+      "runtime": 64.12942671775818,
+      "bks_vehicles": 9,
+      "bks_cost": 824.78,
+      "gap_vehicles": 55.55555555555556,
+      "gap_cost": 70.95467882344383
+    },
+    {
+      "instance": "lc201",
+      "feasible": true,
+      "vehicles": 6,
+      "cost": 2370,
+      "runtime": 70.65049934387207,
+      "bks_vehicles": 3,
+      "bks_cost": 591.56,
+      "gap_vehicles": 100.0,
+      "gap_cost": 300.6356075461492
+    },
+    {
+      "instance": "lc204",
+      "feasible": true,
+      "vehicles": 15,
+      "cost": 2556,
+      "runtime": 85.51609659194946,
+      "bks_vehicles": 3,
+      "bks_cost": 590.6,
+      "gap_vehicles": 400.0,
+      "gap_cost": 332.7802235015239
+    },
+    {
+      "instance": "lr101",
+      "feasible": true,
+      "vehicles": 29,
+      "cost": 2512,
+      "runtime": 30.14845299720764,
+      "bks_vehicles": 19,
+      "bks_cost": 1650.8,
+      "gap_vehicles": 52.63157894736842,
+      "gap_cost": 52.1686455052096
+    },
+    {
+      "instance": "lr104",
+      "feasible": true,
+      "vehicles": 17,
+      "cost": 1893,
+      "runtime": 65.66625833511353,
+      "bks_vehicles": 9,
+      "bks_cost": 1013.39,
+      "gap_vehicles": 88.88888888888889,
+      "gap_cost": 86.79876454277228
+    },
+    {
+      "instance": "lr201",
+      "feasible": true,
+      "vehicles": 7,
+      "cost": 2484,
+      "runtime": 71.30480146408081,
+      "bks_vehicles": 4,
+      "bks_cost": 1253.23,
+      "gap_vehicles": 75.0,
+      "gap_cost": 98.207830964787
+    },
+    {
+      "instance": "lr204",
+      "feasible": true,
+      "vehicles": 7,
+      "cost": 2206,
+      "runtime": 91.76492857933044,
+      "bks_vehicles": 2,
+      "bks_cost": 825.52,
+      "gap_vehicles": 250.0,
+      "gap_cost": 167.22550634751428
+    },
+    {
+      "instance": "lrc101",
+      "feasible": true,
+      "vehicles": 22,
+      "cost": 2487,
+      "runtime": 39.454866886138916,
+      "bks_vehicles": 14,
+      "bks_cost": 1708.8,
+      "gap_vehicles": 57.14285714285714,
+      "gap_cost": 45.54073033707866
+    },
+    {
+      "instance": "lrc104",
+      "feasible": true,
+      "vehicles": 15,
+      "cost": 1841,
+      "runtime": 68.107173204422,
+      "bks_vehicles": 10,
+      "bks_cost": 1128.4,
+      "gap_vehicles": 50.0,
+      "gap_cost": 63.15136476426798
+    }
+  ]
+}

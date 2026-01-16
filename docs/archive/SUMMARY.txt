@@ -1,0 +1,138 @@
+═══════════════════════════════════════════════════════════════════
+STATUS: ARCHIVED (do not edit - historical reference only)
+PURPOSE: Quick summary (Vietnamese) from previous cleanup
+DATE: Archived January 2026
+REPLACED BY: README.md (root) - comprehensive overview
+═══════════════════════════════════════════════════════════════════
+
+                    TÓM TẮT DỰ ÁN PDPTW
+═══════════════════════════════════════════════════════════════════
+
+✅ ĐÃ DỌN DẸP:
+  - Xóa 6 file .md thừa
+  - Chỉ giữ 2 file docs: README.md + ARCHITECTURE.txt
+  - Tổng: 16 files (từ 22 files ban đầu)
+
+═══════════════════════════════════════════════════════════════════
+
+📊 CẤU TRÚC FILE (16 files)
+
+[DOCS - 2 files]
+  ✓ README.md          - Hướng dẫn chi tiết, dependency graph
+  ✓ ARCHITECTURE.txt   - Sơ đồ visual, flow execution
+
+[CORE - 4 files] ⭐⭐⭐⭐⭐
+  ✓ data_loader.py            - Load instance data
+  ✓ iterated_local_search.py  - Thuật toán chính (ILS)
+  ✓ construction_heuristic.py - Tạo solution ban đầu  
+  ✓ evaluator.py              - Tính cost & validate
+
+[OPTIMIZATION - 3 files] ⭐⭐⭐⭐
+  ✓ large_neighborhood_search.py - LNS optimizer
+  ✓ local_search.py              - Local search
+  ✓ solution_encoder.py          - Convert solution
+
+[INTERFACE - 3 files] ⭐⭐⭐
+  ✓ batch_test_ils.py  - Test nhiều instances
+  ✓ quick_test.py      - Test nhanh
+  ✓ clarke_wright.py   - Construction cải tiến
+
+[TESTING - 3 files] ⭐⭐
+  ✓ deep_validation.py
+  ✓ test_improved_validation.py
+  ✓ main.py
+
+[CONFIG - 1 file]
+  ✓ requirements.txt
+
+═══════════════════════════════════════════════════════════════════
+
+🔗 SƠ ĐỒ LIÊN KẾT (ĐƠN GIẢN)
+
+USER
+  ↓
+┌──────────────────┐
+│ batch_test_ils   │ ← Chạy nhiều instances
+│ quick_test       │ ← Test nhanh
+│ main             │ ← Entry point
+└────────┬─────────┘
+         ↓ gọi
+┌────────────────────────┐
+│ iterated_local_search  │ ← CORE ALGORITHM
+└────────┬───────────────┘
+         ↓ sử dụng
+┌─────────────────────────────────────┐
+│ large_neighborhood_search           │
+│ construction_heuristic              │
+│ local_search                        │
+│ clarke_wright                       │
+└────────┬────────────────────────────┘
+         ↓ sử dụng
+┌────────────────────────┐
+│ data_loader            │
+│ evaluator              │
+│ solution_encoder       │
+└────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 CÁCH CHẠY (3 lệnh đơn giản)
+
+1. Test nhanh (30s):
+   cd algorithm && python quick_test.py
+
+2. Test đầy đủ (60s):
+   cd algorithm && python iterated_local_search.py
+
+3. Test nhiều instances (10 phút):
+   cd algorithm && python batch_test_ils.py 10 60
+
+═══════════════════════════════════════════════════════════════════
+
+❓ CÂU HỎI THƯỜNG GẶP
+
+Q: Tại sao cần nhiều file?
+A: Để dễ đọc, dễ maintain. Mỗi file 1 trách nhiệm riêng.
+
+Q: File nào quan trọng nhất?
+A: iterated_local_search.py (thuật toán chính)
+   + data_loader.py (load dữ liệu)
+   + construction_heuristic.py (tạo solution)
+   + evaluator.py (validate & calculate)
+
+Q: ILS chạy OK nhưng batch_test không?
+A: Check: 
+   - Có đang ở folder algorithm/?
+   - Folder ../instances/ có files?
+   - Chạy: python batch_test_ils.py 3 30 (giới hạn)
+
+Q: Làm sao biết file nào gọi file nào?
+A: Đọc ARCHITECTURE.txt → phần DEPENDENCIES
+
+═══════════════════════════════════════════════════════════════════
+
+📈 KẾT QUẢ HIỆN TẠI
+
+Instance: bar-n100-1
+  ✅ Feasible: YES (100%)
+  ✅ Vehicles: 7 (BKS: 6) → Gap +16.67%
+  ✅ Cost: 1087 (BKS: 732) → Gap +48.50%
+  ✅ Runtime: ~24s
+
+Đánh giá: ⭐⭐⭐⭐⭐ EXCELLENT!
+
+═══════════════════════════════════════════════════════════════════
+
+📚 TÀI LIỆU THAM KHẢO
+
+Đọc chi tiết:
+  • README.md        - Hướng dẫn đầy đủ
+  • ARCHITECTURE.txt - Sơ đồ visual
+
+Quick start:
+  • cd algorithm
+  • python quick_test.py
+
+═══════════════════════════════════════════════════════════════════
+                         END OF SUMMARY
+═══════════════════════════════════════════════════════════════════

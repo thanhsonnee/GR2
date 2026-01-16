@@ -1,0 +1,145 @@
+[
+  {
+    "instance": "lc101",
+    "vehicles": 16,
+    "distance": 1393,
+    "feasible": true,
+    "runtime": 222.24701952934265,
+    "bks_vehicles": 10,
+    "bks_distance": 828.94,
+    "gap_vehicles": 60.0,
+    "gap_distance": 68.0459381861172
+  },
+  {
+    "instance": "lc102",
+    "vehicles": 18,
+    "distance": 1526,
+    "feasible": true,
+    "runtime": 209.14257168769836,
+    "bks_vehicles": 10,
+    "bks_distance": 828.94,
+    "gap_vehicles": 80.0,
+    "gap_distance": 84.09052524911331
+  },
+  {
+    "instance": "lc103",
+    "vehicles": 12,
+    "distance": 1327,
+    "feasible": true,
+    "runtime": 211.94072556495667,
+    "bks_vehicles": 9,
+    "bks_distance": 828.06,
+    "gap_vehicles": 33.33333333333333,
+    "gap_distance": 60.2540878680289
+  },
+  {
+    "instance": "lc104",
+    "vehicles": 11,
+    "distance": 1287,
+    "feasible": true,
+    "runtime": 211.04985666275024,
+    "bks_vehicles": 9,
+    "bks_distance": 824.78,
+    "gap_vehicles": 22.22222222222222,
+    "gap_distance": 56.04161109629236
+  },
+  {
+    "instance": "lc105",
+    "vehicles": 18,
+    "distance": 1462,
+    "feasible": true,
+    "runtime": 207.67349576950073,
+    "bks_vehicles": 10,
+    "bks_distance": 828.94,
+    "gap_vehicles": 80.0,
+    "gap_distance": 76.3698217000024
+  },
+  {
+    "instance": "lc106",
+    "vehicles": 12,
+    "distance": 1264,
+    "feasible": true,
+    "runtime": 207.47481966018677,
+    "bks_vehicles": 10,
+    "bks_distance": 828.94,
+    "gap_vehicles": 20.0,
+    "gap_distance": 52.483895094940515
+  },
+  {
+    "instance": "lc107",
+    "vehicles": 14,
+    "distance": 1521,
+    "feasible": true,
+    "runtime": 207.94180583953857,
+    "bks_vehicles": 10,
+    "bks_distance": 828.94,
+    "gap_vehicles": 40.0,
+    "gap_distance": 83.48734528433901
+  },
+  {
+    "instance": "lc108",
+    "vehicles": 12,
+    "distance": 1845,
+    "feasible": true,
+    "runtime": 207.50937175750732,
+    "bks_vehicles": 10,
+    "bks_distance": 828.94,
+    "gap_vehicles": 20.0,
+    "gap_distance": 122.57340700171302
+  },
+  {
+    "instance": "lc109",
+    "vehicles": 11,
+    "distance": 1082,
+    "feasible": true,
+    "runtime": 210.12515687942505,
+    "bks_vehicles": 9,
+    "bks_distance": 828.06,
+    "gap_vehicles": 22.22222222222222,
+    "gap_distance": 30.666859889380007
+  },
+  {
+    "instance": "lr101",
+    "vehicles": 41,
+    "distance": 2680,
+    "feasible": true,
+    "runtime": 204.247061252594,
+    "bks_vehicles": 19,
+    "bks_distance": 1650.8,
+    "gap_vehicles": 115.78947368421053,
+    "gap_distance": 62.345529440271385
+  },
+  {
+    "instance": "lr102",
+    "vehicles": 26,
+    "distance": 2158,
+    "feasible": true,
+    "runtime": 205.37456035614014,
+    "bks_vehicles": 17,
+    "bks_distance": 1487.57,
+    "gap_vehicles": 52.94117647058824,
+    "gap_distance": 45.06880348487803
+  },
+  {
+    "instance": "lr103",
+    "vehicles": 17,
+    "distance": 1709,
+    "feasible": true,
+    "runtime": 205.98468136787415,
+    "bks_vehicles": 13,
+    "bks_distance": 1292.68,
+    "gap_vehicles": 30.76923076923077,
+    "gap_distance": 32.20595971160689
+  },
+  {
+    "instance": "lr104",
+    "vehicles": 16,
+    "distance": 1513,
+    "feasible": true,
+    "runtime": 209.59383964538574,
+    "bks_vehicles": 9,
+    "bks_distance": 1013.39,
+    "gap_vehicles": 77.77777777777779,
+    "gap_distance": 49.30086146498387
+  }
+]

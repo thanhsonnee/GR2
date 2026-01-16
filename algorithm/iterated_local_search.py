@@ -14,29 +14,89 @@ from typing import List, Dict, Tuple, Optional
 from data_loader import Instance, Solution
 from solution_encoder import SolutionEncoder
 from construction_heuristic import GreedyInsertion
+from clarke_wright_pdptw import ClarkeWrightPDPTW
+from route_elimination import RouteElimination
 from large_neighborhood_search import LargeNeighborhoodSearch
 from local_search import LocalSearch
+from feasibility_validator import validate_solution
+from route_improvement import RouteImprovement
 
 
 class AGES:
+# Trong file thuật toán chính của bạn (ví dụ: iterated_local_search.py)
+
+    def generate_initial_solution(self):
+        """
+        Tạo lời giải ban đầu bằng phương pháp Greedy Constructive Heuristic.
+        Tự động thêm xe mới nếu xe hiện tại không chứa được nữa.
+        """
+        unassigned_requests = list(self.instance.pickup_delivery_pairs)
+        # Sắp xếp request để dễ chèn hơn (ví dụ: theo thời gian sớm nhất e_i)
+        unassigned_requests.sort(key=lambda x: self.instance.nodes[x[0]].early_time)
+        
+        routes = []
+        
+        while unassigned_requests:
+            # Bắt đầu một xe mới (Route mới)
+            current_route = [0, 0] # [Depot Start, ..., Depot End]
+            route_load = 0
+            route_time = 0
+            
+            # Biến lưu các request đã chèn được vào xe này
+            inserted_in_this_route = []
+            
+            for req in unassigned_requests[:]: # Duyệt copy của danh sách
+                pickup_node = req[0]
+                delivery_node = req[1]
+                
+                # Thử chèn cặp (Pickup, Delivery) vào lộ trình hiện tại
+                # Hàm này cần kiểm tra: Capacity, Time Window, Pairing
+                best_pos = self.find_best_insertion(current_route, pickup_node, delivery_node)
+                
+                if best_pos is not None:
+                    # Thực hiện chèn
+                    self.apply_insertion(current_route, pickup_node, delivery_node, best_pos)
+                    inserted_in_this_route.append(req)
+            
+            # Nếu tạo xe mới mà không nhét được ai -> Bế tắc (Lỗi dữ liệu hoặc logic chèn quá kém)
+            if not inserted_in_this_route:
+                print("CRITICAL: Cannot insert remaining requests even with empty vehicle!")
+                return None 
+
+            # Lưu lộ trình này và xóa các request đã phục vụ khỏi danh sách chờ
+            routes.append(current_route)
+            for req in inserted_in_this_route:
+                unassigned_requests.remove(req)
+                
+        return routes
+    
     """Automated Generation of Efficient Solutions - Vehicle reduction component"""
     
     def __init__(self, instance: Instance):
         self.instance = instance
     
-    def reduce_vehicles(self, solution: Solution, max_iterations: int = 50) -> Solution:
-        """Attempt to reduce number of vehicles while maintaining feasibility"""
+    def reduce_vehicles(self, solution: Solution, max_iterations: int = 100) -> Solution:
+        """
+        Attempt to reduce number of vehicles while maintaining feasibility
+        AGGRESSIVE: Try harder to merge routes
+        """
         print(f"AGES: Starting vehicle reduction from {solution.get_num_vehicles()} vehicles")
         
         best_solution = self._copy_solution(solution)
         current_vehicles = solution.get_num_vehicles()
+        attempts_without_improvement = 0
+        max_attempts = 20
         
         for iteration in range(max_iterations):
             if len(solution.routes) <= 1:
                 break
+            
+            # Early stop if too many failed attempts
+            if attempts_without_improvement >= max_attempts:
+                break
                 
-            # Try to merge two routes
-            merged_solution = self._try_merge_routes(solution)
+            # Try to merge two routes (AGGRESSIVE: try multiple combinations)
+            merged_solution = self._try_merge_routes_aggressive(solution)
             
             if merged_solution and merged_solution.get_num_vehicles() < current_vehicles:
                 if self._is_feasible(merged_solution):
@@ -44,6 +104,11 @@ class AGES:
                     current_vehicles = solution.get_num_vehicles()
                     print(f"AGES: Reduced to {current_vehicles} vehicles (iteration {iteration+1})")
                     best_solution = self._copy_solution(solution)
+                    attempts_without_improvement = 0
+                else:
+                    attempts_without_improvement += 1
+            else:
+                attempts_without_improvement += 1
                 
         print(f"AGES: Final vehicles: {best_solution.get_num_vehicles()}")
         return best_solution
@@ -65,6 +130,47 @@ class AGES:
                 merged = self._merge_two_routes(solution, route1_idx, route2_idx)
                 if merged:
                     return merged
+        
+        return None
+    
+    def _try_merge_routes_aggressive(self, solution: Solution) -> Optional[Solution]:
+        """
+        Aggressive route merging - try more combinations
+        Priority: merge smallest routes first, but also try random pairs
+        """
+        if len(solution.routes) < 2:
+            return None
+        
+        # Strategy 1: Try smallest routes first
+        route_sizes = [(i, len(route)) for i, route in enumerate(solution.routes)]
+        route_sizes.sort(key=lambda x: x[1])
+        
+        # Try top 5 smallest combinations
+        attempts = 0
+        for i in range(min(5, len(route_sizes) - 1)):
+            for j in range(i + 1, min(i + 5, len(route_sizes))):
+                route1_idx = route_sizes[i][0]
+                route2_idx = route_sizes[j][0]
+                
+                merged = self._merge_two_routes(solution, route1_idx, route2_idx)
+                if merged:
+                    return merged
+                
+                attempts += 1
+                if attempts > 10:
+                    break
+            if attempts > 10:
+                break
+        
+        # Strategy 2: Try random pairs if smallest didn't work
+        import random
+        for _ in range(5):
+            if len(solution.routes) < 2:
+                break
+            i, j = random.sample(range(len(solution.routes)), 2)
+            merged = self._merge_two_routes(solution, i, j)
+            if merged:
+                return merged
         
         return None
     
@@ -147,62 +253,87 @@ class Perturbation:
     def __init__(self, instance: Instance):
         self.instance = instance
     
-    def perturb_solution(self, solution: Solution, intensity: int = 3) -> Solution:
-        """Apply perturbation to solution to escape local optima"""
+    def perturb_solution(self, solution: Solution, intensity: int = 2) -> Solution:
+        """
+        Apply perturbation to solution to escape local optima
+        
+        CRITICAL: Perturbation must preserve feasibility!
+        If perturbation creates infeasible solution, revert to original.
+        """
         print(f"Perturbation: Applying intensity {intensity}")
         
+        original = self._copy_solution(solution)
         perturbed = self._copy_solution(solution)
         
-        for _ in range(intensity):
+        for i in range(intensity):
             # Choose random perturbation type
             perturbation_type = random.choice([
                 'relocate_customers',
-                'swap_routes', 
-                'remove_random'
+                'swap_routes'
             ])
             
             if perturbation_type == 'relocate_customers':
-                perturbed = self._relocate_random_customers(perturbed, 2)
+                perturbed = self._relocate_random_customers(perturbed, 1)
             elif perturbation_type == 'swap_routes':
                 perturbed = self._swap_route_segments(perturbed)
-            elif perturbation_type == 'remove_random':
-                perturbed = self._remove_and_reinsert(perturbed, 1)
+            
+            # Validate after each perturbation step
+            is_feasible, violations = validate_solution(perturbed, self.instance)
+            if not is_feasible:
+                print(f"  Perturbation step {i+1} created infeasibility, reverting...")
+                return original  # Revert to original feasible solution
+        
+        # Final validation
+        is_final_feasible, _ = validate_solution(perturbed, self.instance)
+        if not is_final_feasible:
+            print(f"  Perturbation failed feasibility check, returning original...")
+            return original
         
         return perturbed
     
-    def _relocate_random_customers(self, solution: Solution, num_customers: int) -> Solution:
-        """Relocate random customers to different routes"""
+    def _relocate_random_customers(self, solution: Solution, num_pairs: int) -> Solution:
+        """
+        Relocate random PICKUP-DELIVERY PAIRS to different routes
+        IMPORTANT: Always moves both pickup and delivery together
+        """
         if not solution.routes:
             return solution
             
-        all_customers = []
+        # Collect all pickup-delivery pairs in solution
+        pairs_in_solution = []
         for route_idx, route in enumerate(solution.routes):
-            for customer in route:
-                all_customers.append((customer, route_idx))
+            visited = set()
+            for node_id in route:
+                if node_id not in visited:
+                    node = self.instance.nodes[node_id]
+                    if node.is_pickup() and node.pair in route:
+                        pairs_in_solution.append(((node_id, node.pair), route_idx))
+                        visited.add(node_id)
+                        visited.add(node.pair)
         
-        if len(all_customers) < num_customers:
+        if len(pairs_in_solution) < num_pairs:
             return solution
         
-        # Select random customers to relocate
-        customers_to_move = random.sample(all_customers, num_customers)
+        # Select random pairs to relocate
+        pairs_to_move = random.sample(pairs_in_solution, num_pairs)
         
-        for customer, old_route_idx in customers_to_move:
-            # Remove from old route
-            if customer in solution.routes[old_route_idx]:
-                solution.routes[old_route_idx].remove(customer)
+        for (pickup, delivery), old_route_idx in pairs_to_move:
+            # Remove BOTH pickup and delivery from old route
+            if pickup in solution.routes[old_route_idx]:
+                solution.routes[old_route_idx].remove(pickup)
+            if delivery in solution.routes[old_route_idx]:
+                solution.routes[old_route_idx].remove(delivery)
             
-            # Add to random route or create new route
-            if solution.routes and random.random() > 0.3:
-                new_route_idx = random.randint(0, len(solution.routes) - 1)
-                if new_route_idx != old_route_idx and solution.routes[new_route_idx]:
-                    pos = random.randint(0, len(solution.routes[new_route_idx]))
-                    solution.routes[new_route_idx].insert(pos, customer)
-                else:
-                    # Add to end of old route if can't find good alternative
-                    solution.routes[old_route_idx].append(customer)
-            else:
-                # Create new route
-                solution.routes.append([customer])
+            # Add pair to a different random route
+            if len(solution.routes) > 1:
+                available_routes = [i for i in range(len(solution.routes)) if i != old_route_idx and solution.routes[i]]
+                if available_routes:
+                    new_route_idx = random.choice(available_routes)
+                    # Insert pickup first, then delivery after
+                    pickup_pos = random.randint(0, len(solution.routes[new_route_idx]))
+                    solution.routes[new_route_idx].insert(pickup_pos, pickup)
+                    delivery_pos = random.randint(pickup_pos + 1, len(solution.routes[new_route_idx]) + 1)
+                    solution.routes[new_route_idx].insert(delivery_pos, delivery)
         
         # Remove empty routes
         solution.routes = [route for route in solution.routes if route]
@@ -210,24 +341,33 @@ class Perturbation:
         return solution
     
     def _swap_route_segments(self, solution: Solution) -> Solution:
-        """Swap segments between two routes"""
+        """
+        Swap small segments between two routes
+        Keep segments small to minimize breaking feasibility
+        """
         if len(solution.routes) < 2:
             return solution
             
-        # Select two random routes
-        route1_idx, route2_idx = random.sample(range(len(solution.routes)), 2)
+        # Select two random routes with customers
+        routes_with_customers = [i for i, r in enumerate(solution.routes) if len(r) >= 2]
+        if len(routes_with_customers) < 2:
+            return solution
+        
+        route1_idx, route2_idx = random.sample(routes_with_customers, 2)
         route1 = solution.routes[route1_idx]
         route2 = solution.routes[route2_idx]
         
-        if not route1 or not route2:
-            return solution
+        # Keep segments small (max 2 nodes)
+        max_seg_size = 2
         
-        # Select random segments
-        seg1_start = random.randint(0, max(0, len(route1) - 1))
-        seg1_end = random.randint(seg1_start, len(route1))
+        seg1_size = random.randint(1, min(max_seg_size, len(route1)))
+        seg2_size = random.randint(1, min(max_seg_size, len(route2)))
         
-        seg2_start = random.randint(0, max(0, len(route2) - 1))
-        seg2_end = random.randint(seg2_start, len(route2))
+        seg1_start = random.randint(0, len(route1) - seg1_size)
+        seg2_start = random.randint(0, len(route2) - seg2_size)
+        
+        seg1_end = seg1_start + seg1_size
+        seg2_end = seg2_start + seg2_size
         
         # Extract segments
         seg1 = route1[seg1_start:seg1_end]
@@ -239,38 +379,6 @@ class Perturbation:
         
         solution.routes[route1_idx] = new_route1
         solution.routes[route2_idx] = new_route2
-        
-        return solution
-    
-    def _remove_and_reinsert(self, solution: Solution, num_remove: int) -> Solution:
-        """Remove random customers and reinsert them"""
-        all_customers = []
-        for route in solution.routes:
-            all_customers.extend(route)
-        
-        if len(all_customers) < num_remove:
-            return solution
-        
-        customers_to_remove = random.sample(all_customers, num_remove)
-        
-        # Remove customers
-        for customer in customers_to_remove:
-            for route in solution.routes:
-                if customer in route:
-                    route.remove(customer)
-                    break
-        
-        # Remove empty routes
-        solution.routes = [route for route in solution.routes if route]
-        
-        # Reinsert customers
-        for customer in customers_to_remove:
-            if solution.routes:
-                route_idx = random.randint(0, len(solution.routes) - 1)
-                pos = random.randint(0, len(solution.routes[route_idx]))
-                solution.routes[route_idx].insert(pos, customer)
-            else:
-                solution.routes.append([customer])
         
         return solution
     
@@ -288,15 +396,19 @@ class Perturbation:
 class IteratedLocalSearch:
     """Main ILS framework implementing the research approach"""
     
-    def __init__(self, instance: Instance, max_iterations: int = 10, max_time: int = 300):
+    def __init__(self, instance: Instance, max_iterations: int = 10, max_time: int = 300, 
+                 no_improvement_limit: int = 5):
         self.instance = instance
         self.max_iterations = max_iterations
         self.max_time = max_time
+        self.no_improvement_limit = no_improvement_limit
         
         # Components
         self.ages = AGES(instance)
+        self.route_eliminator = RouteElimination(instance)
         self.set_partitioning = SetPartitioning(instance)
         self.perturbation = Perturbation(instance)
+        self.route_improver = RouteImprovement(instance)
         
         # Best known solutions for comparison
         self.best_known = self._load_best_known_solutions()
@@ -311,29 +423,62 @@ class IteratedLocalSearch:
         
         start_time = time.time()
         
-        # 1. Start with feasible solution
+        # 1. Start with feasible solution using improved construction
         print("Step 1: Generating initial feasible solution")
-        greedy = GreedyInsertion(self.instance)
-        initial_routes = greedy.solve()
-        current_solution = SolutionEncoder.create_solution_from_routes(
+        
+        # Try Clarke-Wright first
+        # Use Clarke-Wright for better initial solution
+        print("Step 1: Constructing initial solution with Clarke-Wright...")
+        cw = ClarkeWrightPDPTW(self.instance)
+        initial_routes = cw.solve(max_time=60)
+        
+        if not initial_routes or len(initial_routes) == 0:
+            print("Clarke-Wright failed, falling back to Greedy")
+            greedy = GreedyInsertion(self.instance)
+            initial_routes = greedy.solve()
+        
+        initial_solution = SolutionEncoder.create_solution_from_routes(
             initial_routes, self.instance.name, "ILS-Initial"
         )
         
-        # VALIDATE INITIAL SOLUTION
-        validator = LocalSearch(self.instance)
-        if not validator._is_valid_solution(current_solution):
-            print("ERROR: Initial solution is not feasible!")
+        # Use LNS to fix infeasible initial solution
+        print("Step 1.5: Using LNS to fix initial solution")
+        # Reduce time to leave budget for main ILS iterations
+        initial_fix_time = min(20, self.max_time * 0.15)  # 15% of total time, max 20s
+        lns_fixer = LargeNeighborhoodSearch(self.instance, max_iterations=100, max_time=initial_fix_time)
+        lns_fixer.current_solution = initial_solution
+        lns_fixer.best_solution = self._copy_solution(initial_solution)
+        current_solution = lns_fixer.solve()
+        
+        # VALIDATE INITIAL SOLUTION - STRICT CHECK
+        is_feasible, violations = validate_solution(current_solution, self.instance)
+        if not is_feasible:
+            print("ERROR: Initial solution is INFEASIBLE!")
+            print(f"Violations: {violations[:5]}")  # Show first 5 violations
+            print("Cannot proceed with infeasible starting point.")
+            print("This indicates a bug in construction heuristic or LNS repair.")
             return None
         
+        print("SUCCESS: Initial solution is feasible!")
         print(f"Initial: {current_solution.get_num_vehicles()} vehicles, cost {current_solution.get_cost(self.instance)}")
         
+        # Start with feasible solution
         best_solution = self._copy_solution(current_solution)
         solutions_pool = []
+        
+        # Early stopping: stop if no improvement for N iterations
+        iterations_without_improvement = 0
+        max_iterations_without_improvement = self.no_improvement_limit
         
         # ILS main loop
         for iteration in range(self.max_iterations):
             if time.time() - start_time > self.max_time:
                 print(f"Time limit reached: {self.max_time}s")
+                break
+            
+            # Early stopping check
+            if iterations_without_improvement >= max_iterations_without_improvement:
+                print(f"Early stopping: No improvement for {max_iterations_without_improvement} iterations")
                 break
                 
             print(f"\n--- ILS Iteration {iteration + 1} ---")
@@ -342,16 +487,41 @@ class IteratedLocalSearch:
             print("Step 2: AGES - Vehicle reduction")
             reduced_solution = self.ages.reduce_vehicles(current_solution)
             
+            # 2.5 Route Elimination - Direct vehicle minimization
+            print("Step 2.5: Route Elimination - Direct vehicle minimization")
+            reduced_solution, eliminated = self.route_eliminator.eliminate_routes(
+                reduced_solution, max_iterations=50, max_time=20
+            )
+            # Clean up empty routes
+            reduced_solution.routes = [r for r in reduced_solution.routes if r]
+            if eliminated > 0:
+                print(f"  Eliminated {eliminated} route(s), now {len(reduced_solution.routes)} vehicles")
+            
             # 3. LNS - Cost optimization  
             print("Step 3: LNS - Cost optimization")
+            # Use more aggressive LNS if max_time is large
+            if self.max_time >= 150:  # Ultra aggressive (3 min)
+                lns_iterations = 3000
+                lns_time = 90
+            elif self.max_time >= 100:  # Aggressive (2 min)
+                lns_iterations = 2000
+                lns_time = 60
+            else:  # Normal
+                lns_iterations = 500
+                lns_time = 20
+            
             lns = LargeNeighborhoodSearch(
                 self.instance, 
-                max_iterations=100, 
-                max_time=30  # Shorter time per LNS run
+                max_iterations=lns_iterations,
+                max_time=lns_time
             )
             lns.current_solution = reduced_solution
             lns.best_solution = self._copy_solution(reduced_solution)
             optimized_solution = lns.solve()
+            
+            # Apply route improvement after LNS
+            print("Step 3.5: Route improvement (local search)")
+            optimized_solution = self.route_improver.improve_solution(optimized_solution, max_time=5.0)
             
             solutions_pool.append(optimized_solution)
             
@@ -362,16 +532,23 @@ class IteratedLocalSearch:
             else:
                 current_solution = optimized_solution
             
-            # VALIDATE SOLUTION BEFORE ACCEPTING 
-            validator = LocalSearch(self.instance)
-            if not validator._is_valid_solution(current_solution):
-                print(f"WARNING: Solution at iteration {iteration+1} is not feasible! Skipping...")
-                continue
+            # VALIDATE SOLUTION BEFORE ACCEPTING - STRICT CHECK
+            is_valid, violations = validate_solution(current_solution, self.instance)
             
-            # Update best solution
+            if not is_valid:
+                print(f"WARNING: Solution at iteration {iteration+1} is INFEASIBLE!")
+                print(f"  Example violation: {violations[0] if violations else 'unknown'}")
+                # Revert to last good solution - DON'T accept infeasible!
+                current_solution = self._copy_solution(best_solution)
+                continue  # Skip to next iteration
+            
+            # Update best solution - ONLY IF FEASIBLE!
             if self._is_better_solution(current_solution, best_solution):
                 best_solution = self._copy_solution(current_solution)
-                print(f"*** NEW BEST: {best_solution.get_num_vehicles()} vehicles, cost {best_solution.get_cost(self.instance)} ***")
+                iterations_without_improvement = 0  # Reset counter
+                print(f"*** NEW BEST FEASIBLE: {best_solution.get_num_vehicles()} vehicles, cost {best_solution.get_cost(self.instance)} ***")
+            else:
+                iterations_without_improvement += 1
             
             # Record iteration
             self.iteration_history.append({
@@ -388,9 +565,8 @@ class IteratedLocalSearch:
         
         total_time = time.time() - start_time
         
-        # FINAL VALIDATION
-        validator = LocalSearch(self.instance)
-        is_final_valid = validator._is_valid_solution(best_solution)
+        # FINAL VALIDATION - STRICT
+        is_final_valid, final_violations = validate_solution(best_solution, self.instance)
         
         # Calculate final metrics
         results = self._calculate_final_metrics(best_solution, total_time)
@@ -406,7 +582,8 @@ class IteratedLocalSearch:
         print(f"Total time: {total_time:.2f}s")
         
         if not is_final_valid:
-            print("⚠️  WARNING: Final solution is NOT feasible!")
+            print("[WARNING] Final solution is NOT feasible!")
+            print(f"  Violations: {final_violations[:3]}")  # Show first 3
         
         return results
     
@@ -484,7 +661,7 @@ class IteratedLocalSearch:
 
 def test_ils_on_n100():
     """Test ILS on n100 instance"""
-    instance_file = "../instances/bar-n100-1.txt"
+    instance_file = "../instances/n100/n100/bar-n100-1.txt"
     
     try:
         # Load instance
@@ -495,8 +672,22 @@ def test_ils_on_n100():
         ils = IteratedLocalSearch(instance, max_iterations=3, max_time=60)  # Shorter for testing
         results = ils.solve()
         
-        # Add solution and instance to results for validation
-        results['solution'] = ils.best_solution
+        # Check if ILS succeeded
+        if results is None:
+            print("\n" + "="*60)
+            print("FAILED TO GENERATE FEASIBLE SOLUTION")
+            print("="*60)
+            print("ILS could not create a feasible solution.")
+            print("This is a known issue with the current construction heuristic.")
+            print("\nRecommendations:")
+            print("1. Implement Clarke-Wright Savings construction")
+            print("2. Debug LNS stuck issue (0 iterations in 60s)")
+            print("3. Add verbose validation to identify violated constraints")
+            print("\nSee STATUS_REPORT.md for detailed analysis and action plan.")
+            return None
+        
+        # Add solution and instance to results for validation  
+        results['solution'] = results.get('solution', None)
         results['instance'] = instance
         
         # Print formatted results

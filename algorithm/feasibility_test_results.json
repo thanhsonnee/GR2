@@ -1,0 +1,46 @@
+{
+  "summary": {
+    "total": 3,
+    "feasible": 3,
+    "infeasible": 0,
+    "failed": 0
+  },
+  "results": [
+    {
+      "instance": "bar-n100-1.txt",
+      "status": "FEASIBLE",
+      "vehicles": 8,
+      "cost": 1026,
+      "is_feasible": true,
+      "gap_vehicles": 33.33333333333333,
+      "gap_cost": 40.16393442622951,
+      "best_vehicles": 6,
+      "best_cost": 732,
+      "runtime": 81.42804598808289
+    },
+    {
+      "instance": "bar-n100-2.txt",
+      "status": "FEASIBLE",
+      "vehicles": 6,
+      "cost": 757,
+      "is_feasible": true,
+      "gap_vehicles": 20.0,
+      "gap_cost": 36.64259927797834,
+      "best_vehicles": 5,
+      "best_cost": 554,
+      "runtime": 61.59156560897827
+    },
+    {
+      "instance": "bar-n100-3.txt",
+      "status": "FEASIBLE",
+      "vehicles": 8,
+      "cost": 1035,
+      "is_feasible": true,
+      "gap_vehicles": 33.33333333333333,
+      "gap_cost": 38.73994638069705,
+      "best_vehicles": 6,
+      "best_cost": 746,
+      "runtime": 241.59389328956604
+    }
+  ]
+}

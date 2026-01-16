@@ -7,6 +7,7 @@ import random
 from typing import List, Tuple, Set, Optional
 from data_loader import Instance, Node
 from solution_encoder import SolutionEncoder
+from clarke_wright_pdptw import ClarkeWrightPDPTW
 
 
 class ConstructionHeuristic:
@@ -68,42 +69,44 @@ class ConstructionHeuristic:
         
     def calculate_total_time(self, route: List[int]) -> int:
         """Calculate total travel time for a route"""
-        if len(route) < 2:
+        if not route:
             return 0
             
         total_time = 0
-        prev_node = route[0]
+        prev_node = 0  # START FROM DEPOT!
         
-        for i in range(1, len(route)):
-            node_id = route[i] if i < len(route) else 0
+        for node_id in route:
+            # Travel time from previous node
             total_time += self.instance.get_travel_time(prev_node, node_id)
             
-            # Add service time
+            # Wait if arrived too early
             node = self.instance.nodes[node_id]
-            total_time = max(total_time, node.etw) + node.dur
+            total_time = max(total_time, node.etw)
+            
+            # Add service time
+            total_time += node.dur
             prev_node = node_id
+        
+        # Return to depot
+        total_time += self.instance.get_travel_time(prev_node, 0)
             
         return total_time
         
     def is_feasible_insertion(self, pickup_node: Node, delivery_node: Node, 
                             route: List[int], pickup_pos: int) -> bool:
         """Check if inserting pickup-delivery pair at position is feasible"""
-        # Basic feasibility checks
-        # 1. Capacity constraint
-        current_load = self.node_demand_at_position(route, pickup_pos)
-        if current_load + pickup_node.dem > self.instance.capacity:
-            return False
-            
-        # 2. Time window for pickup
-        travel_time = self.calculate_total_time(route[:pickup_pos])
-        if pickup_pos < len(route):
-            travel_time += self.instance.get_travel_time(route[pickup_pos-1] if pickup_pos > 0 else 0, pickup_node.idx)
+        # Create temporary route with pickup inserted
+        temp_route = route[:pickup_pos] + [pickup_node.idx] + route[pickup_pos:]
         
-        arrival_time = max(travel_time, pickup_node.etw)
-        if arrival_time > pickup_node.ltw:
-            return False
+        # Try all possible delivery positions after pickup
+        for delivery_pos in range(pickup_pos + 1, len(temp_route) + 1):
+            test_route = temp_route[:delivery_pos] + [delivery_node.idx] + temp_route[delivery_pos:]
             
-        return True
+            # Check if this complete route is feasible
+            if self.is_feasible_route(test_route):
+                return True
+        
+        return False
 
 
 class GreedyInsertion(ConstructionHeuristic):
@@ -139,6 +142,17 @@ class GreedyInsertion(ConstructionHeuristic):
                 
                 # Try creating new route
                 new_route_cost = self.create_new_route_cost(pickup_node, delivery_node)
+                
+                # Set realistic minimum vehicles based on instance size
+                min_vehicles_needed = max(3, len(self.instance.get_pickup_delivery_pairs()) // 12)  # At least 1 vehicle per 12 pairs
+                max_vehicles_allowed = len(self.instance.get_pickup_delivery_pairs()) // 3  # At most 1 vehicle per 3 pairs
+                
+                # Strongly encourage creating new routes when we have too few vehicles
+                if len(routes) < min_vehicles_needed:
+                    new_route_cost *= 0.5  # Heavy penalty to force more vehicles
+                elif len(routes) < min_vehicles_needed * 1.5:
+                    new_route_cost *= 0.8  # Medium penalty
+                
                 if new_route_cost < best_cost:
                     best_cost = new_route_cost
                     best_pair = (pickup_idx, delivery_idx)
@@ -160,17 +174,21 @@ class GreedyInsertion(ConstructionHeuristic):
                 
                 # Find best delivery position
                 route = routes[best_route_idx]
+                
+                # IMPORTANT: Insert pickup FIRST into temp route!
+                temp_route_with_pickup = route[:best_position] + [pickup_node.idx] + route[best_position:]
                 best_delivery_pos = best_position + 1
                 
-                for j in range(best_position + 1, len(route) + 1):
-                    temp_route = route[:j] + [delivery_node.idx] + route[j:]
+                # Now find where to insert delivery (must be AFTER pickup)
+                for j in range(best_position + 1, len(temp_route_with_pickup) + 1):
+                    temp_route = temp_route_with_pickup[:j] + [delivery_node.idx] + temp_route_with_pickup[j:]
                     if self.is_feasible_route(temp_route):
                         best_delivery_pos = j
                         break
                         
-                # Insert pickup and delivery
+                # Insert pickup and delivery (pickup first!)
                 routes[best_route_idx].insert(best_position, pickup_node.idx)
-                routes[best_route_idx].insert(best_delivery_pos + 1, delivery_node.idx)
+                routes[best_route_idx].insert(best_delivery_pos, delivery_node.idx)  # NO +1!
             
             # Remove inserted pair
             unvisited_pairs.remove(best_pair)
@@ -187,43 +205,52 @@ class GreedyInsertion(ConstructionHeuristic):
         
     def is_feasible_route(self, route: List[int]) -> bool:
         """Check if route satisfies all constraints"""
+        if not route:
+            return True
+            
         time = 0
         load = 0
-        visited_deliveries = set()
+        visited_pickups = set()
         
         prev_node = 0  # Start from depot
         for node_id in route:
             node = self.instance.nodes[node_id]
             
             # Update travel time
-            time += self.instance.get_travel_time(prev_node, node_id)
-            time = max(time, node.etw)
+            travel_time = self.instance.get_travel_time(prev_node, node_id)
+            time += travel_time
             
-            # Check time window
-            if time > node.ltw:
+            # Wait until time window opens
+            arrival_time = max(time, node.etw)
+            
+            # Check time window constraint
+            if arrival_time > node.ltw:
                 return False
                 
             # Check pickup-delivery precedence
             if node.is_delivery():
                 pickup_idx = node.pair
-                if pickup_idx not in visited_deliveries:
+                if pickup_idx not in visited_pickups:
                     return False
                     
-            # Update load
+            # Update load and check capacity
             load += node.dem
-            if load > self.instance.capacity:
+            if load > self.instance.capacity or load < 0:
                 return False
                 
-            # Check load non-negative (can't deliver more than loaded)
-            if load < 0:
-                return False
-                
-            # Mark delivery as visited
+            # Mark pickup as visited
             if node.is_pickup():
-                visited_deliveries.add(node_id)
+                visited_pickups.add(node_id)
                 
-            time += node.dur
+            # Update time after service
+            time = arrival_time + node.dur
             prev_node = node_id
+            
+        # Check return to depot time window
+        return_time = time + self.instance.get_travel_time(prev_node, 0)
+        depot_node = self.instance.nodes[0]
+        if return_time > depot_node.ltw:
+            return False
             
         return True
 

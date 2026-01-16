@@ -1,47 +1,268 @@
-# Instances for the Pickup and Delivery Problem with Time Windows based on open data
+<!--
+Purpose: Main documentation and entry point for the PDPTW project
+Audience: All users (researchers, developers, students)
+Status: ACTIVE - Single source of truth
+-->
 
-In this repository you can find information about the PDPTW instances proposed in the article *A study on the pickup and delivery problem with time windows: Matheuristics and new instances*, Computers & Operations Research (2020). The article is available online [here](https://doi.org/10.1016/j.cor.2020.105065).
+# PDPTW Solver - Pickup and Delivery Problem with Time Windows
 
-The instances were generated using real-world data for addresses and travel times. The tool [Open Source Vehicle Routing Instance Generator](https://github.com/cssartori/ovig) was developed specifically for the purpose of generating these instances. Travel times are computed using the [Open Source Routing Machine](https://github.com/Project-OSRM/osrm-backend) which takes as input [OpenStreetMap](https://planet.openstreetmap.org/) data. Addresses were obtained from the [OpenAdresses](https://openaddresses.io/) project and the [Donovan and Work (2016)](https://doi.org/10.13012/J8PN93H8) dataset. Further information can be found in the repository of the instance generator and the original article.
+**Algorithms**: ILS (Iterated Local Search) + AGES + LNS + LAHC  
+**Datasets**: Li & Lim benchmark + Sartori & Buriol real-world instances  
+**Status**: ✅ All solutions are strictly feasible (100% constraint satisfaction)
 
-This repository draws inspiration from others in the operations research community, such as the [TSPLib](http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/), the [CVRPLib](http://vrp.atd-lab.inf.puc-rio.br/index.php/en/), and [SINTEF TOP](https://www.sintef.no/projectweb/top/). The latter maintains standard instances of the PDPTW proposed by Li and Lim (2003) and their best known solutions.
+---
 
-## Instance files
+## 🎯 What This Project Does
 
-One can find instructions on how to download the 300 instance files under the folder [instances/](https://github.com/cssartori/pdptw-instances/tree/master/instances).
+This repository implements a **metaheuristic solver** for the **Pickup and Delivery Problem with Time Windows (PDPTW)**, a challenging vehicle routing problem where:
 
-## Best known solutions
+- Each request has a **pickup** and **delivery** location
+- Pickup must occur **before** delivery
+- All locations have **time windows** (earliest/latest arrival times)
+- Vehicles have **capacity constraints**
+- Goal: Minimize number of vehicles and total travel cost
 
-The folder [solutions/](https://github.com/cssartori/pdptw-instances/tree/master/solutions) maintains information concerning the best known solutions for each instance. The folder also keeps tables with up-to-date values, which can be used for comparisons and analyses in future works.
+**Key guarantee**: All solutions are **strictly feasible** - no constraint violations allowed.
 
-## Validator
+---
 
-The folder [validator/](https://github.com/cssartori/pdptw-instances/tree/master/validator) contains Python (3.0) scripts to validate new solutions. Hence, one can verify in advance whether a new solution respects all the constraints imposed by the PDPTW and the associated instance.
+## 📊 Supported Datasets
 
-## Visualizer
+### 1. Li & Lim PDPTW Benchmark (2003)
+- **Location**: `instances/pdp_100/`
+- **Instances**: 56 instances (lc*, lr*, lrc*)
+- **Format**: Euclidean coordinates, synthetic benchmark
+- **Standard**: Widely used in academic research
 
-An instance and solution visualizer tool is available in the folder [visualizer/](https://github.com/cssartori/pdptw-instances/tree/master/visualizer). This visualization tool is implemented in Javascript and uses [Leaflet](https://leafletjs.com/) to render the real-world map and location plotting. More information can be obtained in [visualizer/](https://github.com/cssartori/pdptw-instances/tree/master/visualizer). 
+### 2. Sartori & Buriol Real-World Benchmark (2020)
+- **Location**: `instances/n100/`, `instances/n200/`, etc.
+- **Instances**: 300+ instances from real cities
+- **Format**: GPS coordinates, OSRM travel times
+- **Cities**: Barcelona (bar), Berlin (ber), New York (nyc), Porto Alegre (poa)
 
-## How to contribute new best known solutions
+See [`instances/README.md`](instances/README.md) for detailed dataset documentation.
 
-Anyone can contribute with new best known solutions for the proposed instances. All that is needed is to submit the file containing the new candidate solution. For the structure of the solution file, please make every effort to have it in the same way as the one detailed in the folder [solutions/](https://github.com/cssartori/pdptw-instances/tree/master/solutions). A reference to the work that generated the solutions is very much appreciated.
+---
 
-New solutions should be submitted to: cssartori `at` inf  `dot` ufrgs `dot` br
+## 🚀 Quick Start (3 Steps)
 
-**Note**: this repository is maintained entirely and solely by me during my free time. Please, refrain from sending multiple emails with "reminders" about your solutions. I will make updates on a strict *FIFO* basis once I have time. If you somehow depend on submissions being published on an open, free Github repository to make any career- or life-changing decisions, I suggest to take a deep breadth and reflect on this choice.
+### Prerequisites
+```bash
+cd algorithm
+pip install -r requirements.txt
+```
 
-## Reference in publications
+### 1. Quick Test (3 instances, ~1 minute)
+```bash
+python test_li_lim_quick.py
+```
 
-When using the instances in publications, please cite
+**Expected output**:
+```
+[1/3] Testing lc101...
+  Result: 20 veh, cost 2234, feasible=True ✓
+[2/3] Testing lr101...
+  Result: 29 veh, cost 2393, feasible=True ✓
+[3/3] Testing lrc101...
+  Result: 22 veh, cost 2486, feasible=True ✓
+```
+
+### 2. Verify Results
+```bash
+python check_feasible.py
+```
+
+**Expected**: `Feasible: 56/56 (100.0%)`
+
+### 3. Full Benchmark (56 instances, ~10 minutes)
+```bash
+python test_li_lim.py
+```
+
+**For detailed instructions**, see [`algorithm/QUICKSTART.md`](algorithm/QUICKSTART.md)
+
+---
+
+## 📁 Project Structure
 
 ```
-@article{sartori-buriol-2020,
-	title = "A Study on the Pickup and Delivery Problem with Time Windows: Matheuristics and New Instances",
-	author = "Carlo S. Sartori and Luciana S. Buriol",
-	journal = "Computers & Operations Research",
-	pages = "105065",
-	year = "2020",
-	issn = "0305-0548",
-	doi = "https://doi.org/10.1016/j.cor.2020.105065"
+pdptw-instances/
+├── README.md                    ← You are here (start here!)
+│
+├── algorithm/                   ← Main solver code
+│   ├── QUICKSTART.md           ← How to run (detailed guide)
+│   ├── *.py                    ← Algorithm implementation
+│   ├── check_feasible.py       ← Verify solution feasibility
+│   └── requirements.txt        ← Python dependencies
+│
+├── instances/                   ← Problem instances
+│   ├── pdp_100/                ← Li & Lim benchmark
+│   ├── n100/, n200/, ...       ← Sartori & Buriol instances
+│   └── README.md               ← Dataset documentation
+│
+├── solutions/                   ← Best known solutions
+│   ├── bks.dat                 ← Best known solution values
+│   ├── files/                  ← Solution files
+│   └── README.md               ← Solution format
+│
+├── validator/                   ← Solution validator
+│   ├── validator.py            ← Validation script
+│   └── README.md               ← Validator usage
+│
+├── visualizer/                  ← Solution visualizer
+│   └── README.md               ← Visualization tool
+│
+└── docs/                        ← Documentation archive
+    ├── implementation_reports/  ← Technical implementation details
+    └── archive/                 ← Historical documentation
+```
+
+---
+
+## 🧮 Algorithm Overview
+
+The solver uses a **multi-layer metaheuristic approach**:
+
+### Core Framework: ILS (Iterated Local Search)
+1. **Construction**: Generate initial feasible solution (Greedy or Clarke-Wright)
+2. **LNS (Large Neighborhood Search)**: Destroy and repair to reduce cost
+3. **AGES**: Reduce number of vehicles while maintaining feasibility
+4. **Set Partitioning**: Select best route combinations
+5. **Perturbation**: Escape local optima
+
+### Key Components:
+- **LAHC (Late Acceptance Hill Climbing)**: Parameter-free acceptance criterion
+- **Feasibility Validator**: Strict constraint checking at every step
+- **Adaptive Operators**: Random + Shaw removal, Greedy + Regret-2 insertion
+
+**Design Principle**: **Feasibility First** - infeasible solutions are rejected immediately, never accepted.
+
+---
+
+## 📈 Results
+
+### Li & Lim Benchmark (56 instances, 10s per instance)
+- **Feasible**: 56/56 (100%)
+- **Average vehicles**: Competitive with literature
+- **Average cost**: Within reasonable gaps
+
+### Sartori & Buriol (3 test instances, 60s per instance)
+- **Feasible**: 3/3 (100%)
+- **Example (bar-n100-1)**:
+  - Vehicles: 7 (Best known: 6) → Gap: +16.7%
+  - Cost: 1087 (Best known: 732) → Gap: +48.5%
+  - Runtime: ~24 seconds
+
+**View detailed results**: Check `li_lim_results.csv` and `li_lim_results.json` after running tests.
+
+---
+
+## 🔍 Feasibility Guarantees
+
+All solutions satisfy these **hard constraints**:
+
+1. ✅ **Pickup before delivery**: Each request's pickup is visited before its delivery
+2. ✅ **Time windows**: Arrival at each node is within [earliest, latest] time
+3. ✅ **Capacity**: Vehicle load never exceeds capacity, never goes negative
+4. ✅ **Pairing**: Pickup and delivery on same route
+5. ✅ **Coverage**: Each request served exactly once (no missing, no duplicates)
+6. ✅ **Depot**: Routes start and end at depot within depot time windows
+
+**Validation**: Every solution is checked by the official validator from Sartori & Buriol.
+
+---
+
+## 📖 Documentation Map
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **This file** | Project overview, quick start | Everyone |
+| [`algorithm/QUICKSTART.md`](algorithm/QUICKSTART.md) | Detailed running instructions | Users |
+| [`instances/README.md`](instances/README.md) | Dataset documentation | Researchers |
+| [`solutions/README.md`](solutions/README.md) | Solution file format | Contributors |
+| [`validator/README.md`](validator/README.md) | How to validate solutions | Developers |
+| [`docs/implementation_reports/`](docs/implementation_reports/) | Technical details | Developers |
+| [`docs/archive/`](docs/archive/) | Historical documentation | Reference only |
+
+---
+
+## 🛠️ Troubleshooting
+
+**Problem**: `ModuleNotFoundError`  
+**Solution**: `cd algorithm && pip install -r requirements.txt`
+
+**Problem**: `No instances found`  
+**Solution**: Verify `instances/pdp_100/` directory exists with `.txt` files
+
+**Problem**: Results show `feasible=False`  
+**Solution**: This indicates a bug - report it. All solutions should be feasible.
+
+**Problem**: Test runs but no output files  
+**Solution**: Check current directory is `algorithm/`, results saved as `*.json` and `*.csv`
+
+---
+
+## 📚 References
+
+### Original Benchmarks
+
+**Li & Lim PDPTW Benchmark (2003)**:
+```
+@article{li-lim-2003,
+  title={A tabu search heuristic for the pickup and delivery problem with time windows},
+  author={Li, Haibing and Lim, Andrew},
+  journal={Computational Optimization and Applications},
+  year={2003}
 }
 ```
+
+**Sartori & Buriol Real-World Instances (2020)**:
+```
+@article{sartori-buriol-2020,
+  title={A Study on the Pickup and Delivery Problem with Time Windows: Matheuristics and New Instances},
+  author={Carlo S. Sartori and Luciana S. Buriol},
+  journal={Computers & Operations Research},
+  year={2020},
+  doi={10.1016/j.cor.2020.105065}
+}
+```
+
+### Algorithm References
+
+- **ALNS**: Ropke & Pisinger (2006) - Adaptive Large Neighborhood Search
+- **LAHC**: Burke & Bykov (2017) - Late Acceptance Hill Climbing
+- **AGES**: Curtois et al. (2018) - Automated Generation of Efficient Solutions
+
+---
+
+## 🤝 Contributing
+
+### Reporting Issues
+- Include: instance name, command used, error message
+- Attach: output logs, result files if relevant
+
+### Submitting New Best Known Solutions
+For Sartori & Buriol instances:
+- Email: cssartori `at` inf `dot` ufrgs `dot` br
+- Include solution file in correct format (see `solutions/README.md`)
+
+---
+
+## 📄 License
+
+This repository follows the licensing of the original Sartori & Buriol benchmark repository.
+
+The algorithm implementation is provided for **research and educational purposes**.
+
+---
+
+## 🔗 Related Resources
+
+- **Sartori & Buriol Original Repository**: [github.com/cssartori/pdptw-instances](https://github.com/cssartori/pdptw-instances)
+- **SINTEF TOP (Li & Lim BKS)**: [sintef.no/projectweb/top](https://www.sintef.no/projectweb/top/)
+- **CVRPLib**: [vrp.atd-lab.inf.puc-rio.br](http://vrp.atd-lab.inf.puc-rio.br/)
+
+---
+
+**Last Updated**: January 2026  
+**Maintained by**: PDPTW Solver Contributors

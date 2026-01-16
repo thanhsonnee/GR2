@@ -1,0 +1,250 @@
+═══════════════════════════════════════════════════════════════════════════════
+STATUS: ARCHIVED (do not edit - historical reference only)
+PURPOSE: ASCII architecture diagrams (Vietnamese)
+DATE: Archived January 2026
+REPLACED BY: README.md (root) - text-based architecture explanation
+═══════════════════════════════════════════════════════════════════════════════
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    PDPTW ALGORITHM ARCHITECTURE                                ║
+║                         (Sơ đồ Kiến trúc)                                     ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                          LAYER 1: USER INTERFACE                              │
+│  (Các file người dùng chạy trực tiếp)                                        │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌────────────────┐  ┌─────────────────┐  ┌──────────────┐                │
+│   │  main.py       │  │ quick_test.py   │  │ batch_test   │                │
+│   │  (1 instance)  │  │ (Test nhanh)    │  │ (Nhiều inst) │                │
+│   └────────┬───────┘  └────────┬────────┘  └──────┬───────┘                │
+│            │                   │                    │                         │
+│            └───────────────────┴────────────────────┘                         │
+│                                │                                              │
+└────────────────────────────────┼──────────────────────────────────────────────┘
+                                 │ gọi
+                                 ↓
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                      LAYER 2: META-HEURISTIC                                  │
+│  (Thuật toán chính - Điều phối tổng thể)                                    │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│               ┌────────────────────────────────────────┐                     │
+│               │  iterated_local_search.py              │                     │
+│               │  ┌──────────────────────────────────┐  │                     │
+│               │  │ ILS Framework:                   │  │                     │
+│               │  │ 1. Construction                  │  │                     │
+│               │  │ 2. LNS (Cost optimization)       │  │                     │
+│               │  │ 3. AGES (Vehicle reduction)      │  │                     │
+│               │  │ 4. Set Partitioning              │  │                     │
+│               │  │ 5. Perturbation                  │  │                     │
+│               │  └──────────────────────────────────┘  │                     │
+│               └────────┬─────────────┬─────────────────┘                     │
+│                        │             │                                        │
+└────────────────────────┼─────────────┼────────────────────────────────────────┘
+                         │             │ sử dụng
+                         ↓             ↓
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                    LAYER 3: OPTIMIZATION COMPONENTS                           │
+│  (Các thuật toán tối ưu hóa)                                                 │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────────────────┐    ┌─────────────────┐    ┌──────────────────┐   │
+│   │  large_neighborhood │    │  local_search   │    │  clarke_wright   │   │
+│   │  _search.py         │    │  .py            │    │  .py             │   │
+│   │  ─────────────────  │    │  ─────────────  │    │  ──────────────  │   │
+│   │  • Destroy & Repair │    │  • Relocate     │    │  • Savings-based │   │
+│   │  • Adaptive ops     │    │  • Swap         │    │  • Time window   │   │
+│   │  • Simulated Ann.   │    │  • 2-opt        │    │  • Capacity      │   │
+│   └──────────┬──────────┘    └────────┬────────┘    └─────────┬────────┘   │
+│              │                        │                        │             │
+└──────────────┼────────────────────────┼────────────────────────┼─────────────┘
+               │                        │                        │ sử dụng
+               ↓                        ↓                        ↓
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                   LAYER 4: CONSTRUCTION HEURISTIC                             │
+│  (Tạo solution ban đầu)                                                      │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│               ┌────────────────────────────────────────┐                     │
+│               │  construction_heuristic.py             │                     │
+│               │  ┌──────────────────────────────────┐  │                     │
+│               │  │ • GreedyInsertion (chính)        │  │                     │
+│               │  │ • NearestNeighbor (dự phòng)     │  │                     │
+│               │  │ • Feasibility checking           │  │                     │
+│               │  │ • Cost calculation               │  │                     │
+│               │  └──────────────────────────────────┘  │                     │
+│               └────────────────────┬───────────────────┘                     │
+│                                    │                                          │
+└────────────────────────────────────┼──────────────────────────────────────────┘
+                                     │ sử dụng
+                                     ↓
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                       LAYER 5: CORE UTILITIES                                 │
+│  (Các thư viện cơ bản)                                                       │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌─────────────┐ │
+│   │ data_loader  │   │  evaluator   │   │ solution_    │   │ deep_       │ │
+│   │ .py          │   │  .py         │   │ encoder.py   │   │ validation  │ │
+│   │ ───────────  │   │  ──────────  │   │ ───────────  │   │ .py         │ │
+│   │ • Instance   │   │ • Cost calc  │   │ • Convert    │   │ • Detailed  │ │
+│   │ • Node       │   │ • Validate   │   │ • Save file  │   │ • Check     │ │
+│   │ • Load file  │   │ • Check      │   │ • Format     │   │             │ │
+│   └──────────────┘   └──────────────┘   └──────────────┘   └─────────────┘ │
+│                                                                               │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                          EXECUTION FLOW (Luồng chạy)                          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+START: python iterated_local_search.py
+  │
+  ├─> 1. LOAD INSTANCE
+  │     └─> data_loader.py: Read bar-n100-1.txt
+  │           → Instance(100 customers, capacity=300)
+  │
+  ├─> 2. CONSTRUCTION
+  │     └─> construction_heuristic.py: GreedyInsertion
+  │           → Initial: 9 vehicles, cost=1101
+  │
+  ├─> 3. LNS FIX (Optional)
+  │     └─> large_neighborhood_search.py: Try improve
+  │           → 200 iterations, still 9 vehicles
+  │
+  ├─> 4. VALIDATE INITIAL
+  │     └─> local_search.py: Check feasibility
+  │           → ✅ FEASIBLE!
+  │
+  ├─> 5. ILS MAIN LOOP (3 iterations)
+  │     │
+  │     ├─> Iteration 1:
+  │     │     ├─ AGES: 9 → 7 vehicles
+  │     │     ├─ LNS: Optimize (cost 1087)
+  │     │     ├─ Validate: ✅ FEASIBLE
+  │     │     └─ Update best: 7 vehicles, 1087
+  │     │
+  │     ├─> Iteration 2:
+  │     │     ├─ AGES: Keep 7 vehicles
+  │     │     ├─ LNS: No improvement
+  │     │     ├─ SP: Select best from pool
+  │     │     └─ Perturbation: Escape local optima
+  │     │
+  │     └─> Iteration 3:
+  │           ├─ Similar...
+  │           └─ Final: 7 vehicles, 1087, ✅ FEASIBLE
+  │
+  ├─> 6. FINAL VALIDATION
+  │     └─> evaluator.py: Check & calculate
+  │           → Gap: +16.67% vehicles, +48.50% cost
+  │
+  └─> 7. OUTPUT
+        └─> Print results: FEASIBLE, 7 vehicles, 1087 cost
+        
+END: Runtime ~24s
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    DEPENDENCIES (Ai phụ thuộc vào ai?)                        ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+iterated_local_search.py
+    ├─> large_neighborhood_search.py
+    │     ├─> local_search.py
+    │     │     ├─> evaluator.py
+    │     │     │     └─> data_loader.py
+    │     │     └─> data_loader.py
+    │     └─> construction_heuristic.py
+    │           ├─> data_loader.py
+    │           ├─> evaluator.py
+    │           └─> solution_encoder.py
+    │
+    ├─> construction_heuristic.py (xem trên)
+    ├─> clarke_wright.py
+    │     └─> data_loader.py
+    │
+    ├─> local_search.py (xem trên)
+    └─> solution_encoder.py
+          └─> data_loader.py
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                      FILE IMPORTANCE (Mức độ quan trọng)                      ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+⭐⭐⭐⭐⭐ CRITICAL (Không thể thiếu)
+  • data_loader.py          - Load data từ file
+  • iterated_local_search.py - Thuật toán chính
+  • construction_heuristic.py - Tạo solution ban đầu
+  • evaluator.py            - Tính cost & validate
+
+⭐⭐⭐⭐ VERY IMPORTANT (Rất quan trọng)
+  • large_neighborhood_search.py - Tối ưu cost
+  • local_search.py         - Cải thiện solution
+  • solution_encoder.py     - Convert & save
+
+⭐⭐⭐ IMPORTANT (Quan trọng)
+  • batch_test_ils.py       - Test nhiều instances
+  • clarke_wright.py        - Construction cải tiến
+
+⭐⭐ USEFUL (Hữu ích)
+  • quick_test.py          - Test nhanh
+  • deep_validation.py     - Validation chi tiết
+
+⭐ OPTIONAL (Tùy chọn)
+  • main.py                - Entry point đơn giản
+  • test_improved_validation.py - Unit tests
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                  TROUBLESHOOTING (Xử lý lỗi thường gặp)                       ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+❌ ImportError: No module named 'data_loader'
+   → Check: Bạn có đang ở folder algorithm/ không?
+   → Fix: cd algorithm
+
+❌ FileNotFoundError: '../instances/bar-n100-1.txt'
+   → Check: Folder instances/ có tồn tại không?
+   → Fix: ls ../instances/n100/n100/
+
+❌ iterated_local_search.py chạy OK, nhưng batch_test_ils.py lỗi
+   → Nguyên nhân: batch_test tìm nhiều files, có thể thiếu
+   → Fix: Chạy với số lượng giới hạn: python batch_test_ils.py 3 30
+
+❌ AttributeError: 'NoneType' object has no attribute...
+   → Nguyên nhân: Thuật toán không tạo được solution
+   → Fix: Đã fix trong code (strict feasibility check)
+
+❌ Solution is INFEASIBLE
+   → Nguyên nhân: Vi phạm time windows hoặc capacity
+   → Fix: Đã fix (2 bugs trong construction_heuristic.py)
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         QUICK START GUIDE                                      ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+1️⃣  Test nhanh (30 giây):
+    cd algorithm
+    python quick_test.py
+
+2️⃣  Test đầy đủ 1 instance (60 giây):
+    cd algorithm
+    python iterated_local_search.py
+
+3️⃣  Test 5 instances (5 phút):
+    cd algorithm
+    python batch_test_ils.py 5 60
+
+4️⃣  Test TẤT CẢ instances (1-3 giờ):
+    cd algorithm
+    python batch_test_ils.py all 60
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                              END OF ARCHITECTURE
+═══════════════════════════════════════════════════════════════════════════════

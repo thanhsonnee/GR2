@@ -12,8 +12,10 @@ class Node:
     """Represents a node in PDPTW instance"""
     def __init__(self):
         self.idx = 0        # node index  
-        self.lat = 0.0      # latitude
-        self.long = 0.0     # longitude
+        self.lat = 0.0      # latitude (Sartori & Buriol format)
+        self.long = 0.0     # longitude (Sartori & Buriol format)
+        self.x = 0.0        # x coordinate (Li & Lim format)
+        self.y = 0.0        # y coordinate (Li & Lim format)
         self.dem = 0        # demand (positive: pickup, negative: delivery)
         self.etw = 0        # earliest time window start
         self.ltw = 0        # latest time window start  
@@ -50,7 +52,25 @@ class Instance:
         return self.times
 
     def read_from_file(self, filename: str):
-        """Read instance from file following the format in how_to_read.txt"""
+        """
+        Read instance from file - auto-detects format
+        Supports both Sartori & Buriol and Li & Lim formats
+        """
+        # Auto-detect format
+        from li_lim_parser import is_li_lim_format, parse_li_lim_instance
+        
+        if is_li_lim_format(filename):
+            # Use Li & Lim parser
+            parsed_instance = parse_li_lim_instance(filename)
+            # Copy all attributes to self
+            self.name = parsed_instance.name
+            self.size = parsed_instance.size
+            self.capacity = parsed_instance.capacity
+            self.nodes = parsed_instance.nodes
+            self.times = parsed_instance.times
+            return
+        
+        # Otherwise, use Sartori & Buriol parser (original code below)
         with open(filename, "r") as f:
             # Read header section until we hit the NODES marker
             for _ in range(100):
@@ -127,7 +147,16 @@ class Instance:
                 
     def get_travel_time(self, from_node: int, to_node: int) -> int:
         """Get travel time between two nodes"""
-        return self.times[from_node][to_node]
+        try:
+            # Bounds checking
+            if (from_node < 0 or from_node >= len(self.times) or 
+                to_node < 0 or to_node >= len(self.times[0]) if self.times else True):
+                print(f"Warning: Invalid node indices: {from_node} -> {to_node}")
+                return 9999  # Large penalty for invalid access
+            return self.times[from_node][to_node]
+        except (IndexError, TypeError):
+            print(f"Error accessing travel time matrix: {from_node} -> {to_node}")
+            return 9999
         
     def get_node(self, idx: int) -> Node:
         """Get node by index"""
