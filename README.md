@@ -1,268 +1,102 @@
-<!--
-Purpose: Main documentation and entry point for the PDPTW project
-Audience: All users (researchers, developers, students)
-Status: ACTIVE - Single source of truth
--->
+# PDPTW Solver - Demo Project
 
-# PDPTW Solver - Pickup and Delivery Problem with Time Windows
+Đây là dự án giải quyết bài toán **Pickup and Delivery Problem with Time Windows (PDPTW)** sử dụng các thuật toán Metaheuristics hiện đại.
 
-**Algorithms**: ILS (Iterated Local Search) + AGES + LNS + LAHC  
-**Datasets**: Li & Lim benchmark + Sartori & Buriol real-world instances  
-**Status**: ✅ All solutions are strictly feasible (100% constraint satisfaction)
+Dự án được thiết kế để tối ưu hóa lộ trình giao nhận hàng hóa với các ràng buộc khắt khe về khung thời gian (Time Windows) và ưu tiên (Precedence).
 
 ---
 
-## 🎯 What This Project Does
+## � 1. Cài đặt & Chuẩn bị
 
-This repository implements a **metaheuristic solver** for the **Pickup and Delivery Problem with Time Windows (PDPTW)**, a challenging vehicle routing problem where:
+### Bước 1: Clone dự án
+```bash
+git clone https://github.com/thanhsonnee/pdptw-instances.git
+cd pdptw-instances
+```
 
-- Each request has a **pickup** and **delivery** location
-- Pickup must occur **before** delivery
-- All locations have **time windows** (earliest/latest arrival times)
-- Vehicles have **capacity constraints**
-- Goal: Minimize number of vehicles and total travel cost
-
-**Key guarantee**: All solutions are **strictly feasible** - no constraint violations allowed.
-
----
-
-## 📊 Supported Datasets
-
-### 1. Li & Lim PDPTW Benchmark (2003)
-- **Location**: `instances/pdp_100/`
-- **Instances**: 56 instances (lc*, lr*, lrc*)
-- **Format**: Euclidean coordinates, synthetic benchmark
-- **Standard**: Widely used in academic research
-
-### 2. Sartori & Buriol Real-World Benchmark (2020)
-- **Location**: `instances/n100/`, `instances/n200/`, etc.
-- **Instances**: 300+ instances from real cities
-- **Format**: GPS coordinates, OSRM travel times
-- **Cities**: Barcelona (bar), Berlin (ber), New York (nyc), Porto Alegre (poa)
-
-See [`instances/README.md`](instances/README.md) for detailed dataset documentation.
-
----
-
-## 🚀 Quick Start (3 Steps)
-
-### Prerequisites
+### Bước 2: Cài đặt môi trường
+Đảm bảo bạn đã cài đặt Python (3.8+). Sau đó cài đặt các thư viện cần thiết:
 ```bash
 cd algorithm
 pip install -r requirements.txt
 ```
 
-### 1. Quick Test (3 instances, ~1 minute)
+---
+
+## 🎮 2. Demo Chức năng (Kịch bản Demo)
+
+Dưới đây là 3 kịch bản demo chính để trình bày khả năng của hệ thống.
+
+### Kịch bản 1: Kiểm tra nhanh (Quick sanity check)
+Chạy thử nghiệm trên 3 bộ dữ liệu chuẩn (Li & Lim) để đảm bảo hệ thống hoạt động ổn định.
+
+**Lệnh chạy:**
 ```bash
 python test_li_lim_quick.py
 ```
+**Kết quả mong đợi:**
+- Thời gian chạy: ~1 phút
+- Kết quả: Feasible (Hợp lệ) cho cả 3 instances (lc101, lr101, lrc101).
 
-**Expected output**:
-```
-[1/3] Testing lc101...
-  Result: 20 veh, cost 2234, feasible=True ✓
-[2/3] Testing lr101...
-  Result: 29 veh, cost 2393, feasible=True ✓
-[3/3] Testing lrc101...
-  Result: 22 veh, cost 2486, feasible=True ✓
-```
+### Kịch bản 2: Giải bài toán thực tế & Trực quan hóa (Viusalization)
+Giải bài toán quy mô lớn (Barcelona) và hiển thị lộ trình lên bản đồ thực tế.
 
-### 2. Verify Results
+**Lệnh chạy:**
 ```bash
-python check_feasible.py
+python demo_sartori.py
 ```
+**Kết quả mong đợi:**
+- Hệ thống sẽ tìm lời giải trong 60s.
+- File kết quả được lưu tại `algorithm/output_demo/solution_bar-n100-1.txt`.
 
-**Expected**: `Feasible: 56/56 (100.0%)`
+**Xem trên bản đồ:**
+1. Mở file `visualizer/visualizer.html` bằng trình duyệt web.
+2. Mục **Instance**: Chọn file `instances/n100/n100/bar-n100-1.txt`.
+3. Mục **Solution**: Chọn file kết quả vừa tạo (`algorithm/output_demo/solution_bar-n100-1.txt`).
+4. Quan sát lộ trình được vẽ trên bản đồ.
 
-### 3. Full Benchmark (56 instances, ~10 minutes)
+### Kịch bản 3: Benchmark toàn diện (Full Test)
+Chạy kiểm thử trên toàn bộ 56 instances của bộ Li & Lim (chỉ chạy nếu có nhiều thời gian).
+
+**Lệnh chạy:**
 ```bash
 python test_li_lim.py
 ```
 
-**For detailed instructions**, see [`algorithm/QUICKSTART.md`](algorithm/QUICKSTART.md)
-
----
-
-## 📁 Project Structure
-
-```
-pdptw-instances/
-├── README.md                    ← You are here (start here!)
-│
-├── algorithm/                   ← Main solver code
-│   ├── QUICKSTART.md           ← How to run (detailed guide)
-│   ├── *.py                    ← Algorithm implementation
-│   ├── check_feasible.py       ← Verify solution feasibility
-│   └── requirements.txt        ← Python dependencies
-│
-├── instances/                   ← Problem instances
-│   ├── pdp_100/                ← Li & Lim benchmark
-│   ├── n100/, n200/, ...       ← Sartori & Buriol instances
-│   └── README.md               ← Dataset documentation
-│
-├── solutions/                   ← Best known solutions
-│   ├── bks.dat                 ← Best known solution values
-│   ├── files/                  ← Solution files
-│   └── README.md               ← Solution format
-│
-├── validator/                   ← Solution validator
-│   ├── validator.py            ← Validation script
-│   └── README.md               ← Validator usage
-│
-├── visualizer/                  ← Solution visualizer
-│   └── README.md               ← Visualization tool
-│
-└── docs/                        ← Documentation archive
-    ├── implementation_reports/  ← Technical implementation details
-    └── archive/                 ← Historical documentation
+### Script kiểm tra tính hợp lệ (Validation)
+Để chứng minh kết quả tạo ra luôn tuân thủ mọi ràng buộc:
+```bash
+python check_feasible.py
 ```
 
 ---
 
-## 🧮 Algorithm Overview
+## 🧠 3. Giải thích Thuật toán
 
-The solver uses a **multi-layer metaheuristic approach**:
+Dự án sử dụng chiến lược **Multi-stage Metaheuristics** (Metaheuristics đa giai đoạn):
 
-### Core Framework: ILS (Iterated Local Search)
-1. **Construction**: Generate initial feasible solution (Greedy or Clarke-Wright)
-2. **LNS (Large Neighborhood Search)**: Destroy and repair to reduce cost
-3. **AGES**: Reduce number of vehicles while maintaining feasibility
-4. **Set Partitioning**: Select best route combinations
-5. **Perturbation**: Escape local optima
+1.  **Giai đoạn 1: Khởi tạo (Construction)**
+    -   Sử dụng giải thuật tham lam (Greedy) hoặc Clarke-Wright Savings để tạo ra một lời giải ban đầu *chấp nhận được* (feasible).
 
-### Key Components:
-- **LAHC (Late Acceptance Hill Climbing)**: Parameter-free acceptance criterion
-- **Feasibility Validator**: Strict constraint checking at every step
-- **Adaptive Operators**: Random + Shaw removal, Greedy + Regret-2 insertion
+2.  **Giai đoạn 2: Giảm số lượng xe (AGES)**
+    -   Áp dụng thuật toán **AGES (Automated Generation of Efficient Solutions)**.
+    -   Cố gắng gộp các lộ trình nhỏ lại với nhau, mục tiêu chính là giảm số lượng xe sử dụng xuống mức tối thiểu.
 
-**Design Principle**: **Feasibility First** - infeasible solutions are rejected immediately, never accepted.
+3.  **Giai đoạn 3: Tối ưu chi phí (LNS & Local Search)**
+    -   **LNS (Large Neighborhood Search)**: Phá hủy (xóa bớt khách hàng) và sửa chữa (thêm lại khách hàng) để tìm cấu trúc lộ trình tốt hơn.
+    -   **Local Search**: Tinh chỉnh cục bộ (2-opt, Relocate, Exchange) để giảm tổng quãng đường di chuyển.
 
----
-
-## 📈 Results
-
-### Li & Lim Benchmark (56 instances, 10s per instance)
-- **Feasible**: 56/56 (100%)
-- **Average vehicles**: Competitive with literature
-- **Average cost**: Within reasonable gaps
-
-### Sartori & Buriol (3 test instances, 60s per instance)
-- **Feasible**: 3/3 (100%)
-- **Example (bar-n100-1)**:
-  - Vehicles: 7 (Best known: 6) → Gap: +16.7%
-  - Cost: 1087 (Best known: 732) → Gap: +48.5%
-  - Runtime: ~24 seconds
-
-**View detailed results**: Check `li_lim_results.csv` and `li_lim_results.json` after running tests.
+4.  **Cơ chế thoát cực trị địa phương (Perturbation)**
+    -   Nếu thuật toán bị kẹt, hệ thống sẽ "rung lắc" (perturb) lời giải bằng cách đảo lộn ngẫu nhiên một số phần tử, giúp tìm kiếm các hướng đi mới.
 
 ---
 
-## 🔍 Feasibility Guarantees
+## 📂 4. Cấu trúc Thư mục
 
-All solutions satisfy these **hard constraints**:
-
-1. ✅ **Pickup before delivery**: Each request's pickup is visited before its delivery
-2. ✅ **Time windows**: Arrival at each node is within [earliest, latest] time
-3. ✅ **Capacity**: Vehicle load never exceeds capacity, never goes negative
-4. ✅ **Pairing**: Pickup and delivery on same route
-5. ✅ **Coverage**: Each request served exactly once (no missing, no duplicates)
-6. ✅ **Depot**: Routes start and end at depot within depot time windows
-
-**Validation**: Every solution is checked by the official validator from Sartori & Buriol.
+-   `algorithm/`: Chứa mã nguồn chính (Python).
+-   `instances/`: Dữ liệu đầu vào (Li & Lim, Sartori Real-world).
+-   `solutions/`: Nơi lưu trữ các kết quả tốt nhất từng tìm được.
+-   `visualizer/`: Công cụ hiển thị lộ trình (HTML/JS).
+-   `docs/`: Tài liệu chi tiết và báo cáo kỹ thuật.
 
 ---
-
-## 📖 Documentation Map
-
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| **This file** | Project overview, quick start | Everyone |
-| [`algorithm/QUICKSTART.md`](algorithm/QUICKSTART.md) | Detailed running instructions | Users |
-| [`instances/README.md`](instances/README.md) | Dataset documentation | Researchers |
-| [`solutions/README.md`](solutions/README.md) | Solution file format | Contributors |
-| [`validator/README.md`](validator/README.md) | How to validate solutions | Developers |
-| [`docs/implementation_reports/`](docs/implementation_reports/) | Technical details | Developers |
-| [`docs/archive/`](docs/archive/) | Historical documentation | Reference only |
-
----
-
-## 🛠️ Troubleshooting
-
-**Problem**: `ModuleNotFoundError`  
-**Solution**: `cd algorithm && pip install -r requirements.txt`
-
-**Problem**: `No instances found`  
-**Solution**: Verify `instances/pdp_100/` directory exists with `.txt` files
-
-**Problem**: Results show `feasible=False`  
-**Solution**: This indicates a bug - report it. All solutions should be feasible.
-
-**Problem**: Test runs but no output files  
-**Solution**: Check current directory is `algorithm/`, results saved as `*.json` and `*.csv`
-
----
-
-## 📚 References
-
-### Original Benchmarks
-
-**Li & Lim PDPTW Benchmark (2003)**:
-```
-@article{li-lim-2003,
-  title={A tabu search heuristic for the pickup and delivery problem with time windows},
-  author={Li, Haibing and Lim, Andrew},
-  journal={Computational Optimization and Applications},
-  year={2003}
-}
-```
-
-**Sartori & Buriol Real-World Instances (2020)**:
-```
-@article{sartori-buriol-2020,
-  title={A Study on the Pickup and Delivery Problem with Time Windows: Matheuristics and New Instances},
-  author={Carlo S. Sartori and Luciana S. Buriol},
-  journal={Computers & Operations Research},
-  year={2020},
-  doi={10.1016/j.cor.2020.105065}
-}
-```
-
-### Algorithm References
-
-- **ALNS**: Ropke & Pisinger (2006) - Adaptive Large Neighborhood Search
-- **LAHC**: Burke & Bykov (2017) - Late Acceptance Hill Climbing
-- **AGES**: Curtois et al. (2018) - Automated Generation of Efficient Solutions
-
----
-
-## 🤝 Contributing
-
-### Reporting Issues
-- Include: instance name, command used, error message
-- Attach: output logs, result files if relevant
-
-### Submitting New Best Known Solutions
-For Sartori & Buriol instances:
-- Email: cssartori `at` inf `dot` ufrgs `dot` br
-- Include solution file in correct format (see `solutions/README.md`)
-
----
-
-## 📄 License
-
-This repository follows the licensing of the original Sartori & Buriol benchmark repository.
-
-The algorithm implementation is provided for **research and educational purposes**.
-
----
-
-## 🔗 Related Resources
-
-- **Sartori & Buriol Original Repository**: [github.com/cssartori/pdptw-instances](https://github.com/cssartori/pdptw-instances)
-- **SINTEF TOP (Li & Lim BKS)**: [sintef.no/projectweb/top](https://www.sintef.no/projectweb/top/)
-- **CVRPLib**: [vrp.atd-lab.inf.puc-rio.br](http://vrp.atd-lab.inf.puc-rio.br/)
-
----
-
-**Last Updated**: January 2026  
-**Maintained by**: PDPTW Solver Contributors

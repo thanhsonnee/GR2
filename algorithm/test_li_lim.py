@@ -21,15 +21,29 @@ LI_LIM_DIR = "../instances/pdp_100"
 TIME_LIMIT_PER_INSTANCE = 30  # seconds (improved quality for better BKS gaps)
 
 
+import random
+import argparse
+
 class LiLimTester:
     """Batch tester for Li & Lim PDPTW benchmark"""
     
-    def __init__(self):
+    def __init__(self, seed: int = None, runs: int = 1):
         self.results = []
         self.total_instances = 0
         self.feasible_count = 0
         self.infeasible_count = 0
         self.failed_count = 0
+        self.seed = seed
+        self.runs = runs
+        
+        if self.seed is not None:
+            print(f"Global Random Seed: {self.seed}")
+            self.set_seed(self.seed)
+            
+    def set_seed(self, seed: int):
+        """Set random seed for reproducibility"""
+        random.seed(seed)
+        # np.random.seed(seed) # If numpy is used later
     
     def run_all_instances(self):
         """Run on ALL Li & Lim pdp100 instances"""
@@ -48,6 +62,10 @@ class LiLimTester:
         print(f"Found {len(instance_files)} instances in {LI_LIM_DIR}")
         print(f"Time limit: {TIME_LIMIT_PER_INSTANCE}s per instance")
         print(f"Algorithm: ILS + AGES + LNS + LAHC (strict feasibility)")
+        if self.runs > 1:
+            print(f"Configuration: Best of {self.runs} runs per instance")
+        if self.seed is not None:
+            print(f"Reproducibility: Fixed Seed {self.seed}")
         print("="*80)
         
         # Process each instance
@@ -59,14 +77,50 @@ class LiLimTester:
             print(f"\n[{i}/{len(instance_files)}] {instance_name}")
             print("-"*80)
             
-            result = self._test_single_instance(instance_file)
-            self.results.append(result)
+            # If seed matches level 1 (fixed seed), we want deterministic sequence
+            # But if runs > 1, we might want different seeds for each run?
+            # Strategy: If global seed set, re-seed before each instance to ensure
+            # skipping an instance doesn't affect others if we were to implement partial runs.
+            # For now, just rely on global stream or set specific seed per instance.
             
-            # Update counters
+            best_result = None
+            
+            for run in range(1, self.runs + 1):
+                if self.runs > 1:
+                    print(f"  Run {run}/{self.runs}...")
+                
+                # If doing multiple runs without a fixed global seed, we let it be random.
+                # If doing multiple runs WITH a fixed global seed, we want diversity but deterministic.
+                # So we can seed with (global_seed + instance_idx + run_idx)
+                if self.seed is not None and self.runs > 1:
+                    run_seed = self.seed + i * 1000 + run
+                    self.set_seed(run_seed)
+                
+                result = self._test_single_instance(instance_file)
+                
+                # Logic to keep best result
+                if best_result is None:
+                    best_result = result
+                else:
+                    # Prefer Feasible over Infeasible
+                    if result['feasible'] and not best_result['feasible']:
+                        best_result = result
+                    elif result['feasible'] and best_result['feasible']:
+                        # Prefer fewer vehicles
+                        if result['vehicles'] < best_result['vehicles']:
+                            best_result = result
+                        elif result['vehicles'] == best_result['vehicles']:
+                            # Prefer lower cost
+                            if result['cost'] < best_result['cost']:
+                                best_result = result
+            
+            self.results.append(best_result)
+            
+            # Update counters based on BEST result
             self.total_instances += 1
-            if result['feasible']:
+            if best_result['feasible']:
                 self.feasible_count += 1
-            elif result['status'] == 'FAILED':
+            elif best_result['status'] == 'FAILED':
                 self.failed_count += 1
             else:
                 self.infeasible_count += 1
@@ -340,7 +394,13 @@ class LiLimTester:
 
 def main():
     """Main entry point"""
-    tester = LiLimTester()
+    parser = argparse.ArgumentParser(description='Li & Lim PDPTW Benchmark Runner')
+    parser.add_argument('--seed', type=int, help='Random seed for reproducibility (Level 1)')
+    parser.add_argument('--runs', type=int, default=1, help='Number of runs per instance (Level 2)')
+    
+    args = parser.parse_args()
+    
+    tester = LiLimTester(seed=args.seed, runs=args.runs)
     tester.run_all_instances()
 
 
